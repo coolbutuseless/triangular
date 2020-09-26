@@ -135,9 +135,7 @@ decompose <- function(polys_df) {
   # Do a test to count how often the point crosses one of the original
   # polygon segments.
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  crosses <- vapply(seq_len(nrow(centroids)), function(ci) {
-    point_in_polygons(centroids$x[ci], centroids$y[ci], polygons_list)
-  }, FUN.VALUE = integer(1))
+  crosses <- points_in_polygons(centroids$x, centroids$y, polygons_list)
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Assign 'interior' as TRUE/FALSE depedning on whether the number of

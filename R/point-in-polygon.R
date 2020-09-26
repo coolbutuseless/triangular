@@ -7,6 +7,7 @@
 #' @param poly data.frame with x and y coordinates of all vertices
 #'
 #' @return count of segment crossings
+#' @export
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 point_in_polygon <- function(x, y, poly) {
 
@@ -55,6 +56,7 @@ point_in_polygon <- function(x, y, poly) {
 #' @param polygons_list list of polygon data.frames
 #'
 #' @return sum of all crossings over all polygons
+#' @export
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 point_in_polygons <- function(x, y, polygons_list) {
   stopifnot(is.list(polygons_list) && !is.data.frame(polygons_list))
@@ -64,6 +66,24 @@ point_in_polygons <- function(x, y, polygons_list) {
 
   sum(unlist(crosses))
 }
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#' Determine number of segment crossings from (x, y) within all polygons
+#'
+#' @param x,y coordinates of all points to test
+#' @param polygons_list list of polygon data.frames
+#'
+#' @return sum of all crossings over all polygons for each point
+#' @export
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+points_in_polygons <- function(x, y, polygons_list) {
+  vapply(seq_along(x), function(ci) {
+    point_in_polygons(x[ci], y[ci], polygons_list)
+  }, FUN.VALUE = integer(1))
+}
+
+
 
 
 

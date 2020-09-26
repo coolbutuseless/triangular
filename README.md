@@ -15,6 +15,11 @@ works with:
   - polygons with holes
   - self-intersecting polygons
 
+This package relies heavily on
+[RTriangle](https://cran.r-project.org/package=RTriangle) - which is
+licensed [CC
+BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0).
+
 ## Installation
 
 You can install from
