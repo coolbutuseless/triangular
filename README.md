@@ -73,13 +73,13 @@ res <- triangular::decompose(polygons_df)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Remove the triangles which are 'interior' according to the even-odd rule
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-tri_df <- res$plot_df %>%
+triangles_df <- res$triangles_df %>%
   filter(interior)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Plot the triangles
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-ggplot(tri_df) +
+ggplot(triangles_df) +
   geom_polygon(aes(x, y, group = idx), alpha = 0.3, colour = 'blue') +
   theme_bw() + 
   coord_equal() + 
@@ -121,10 +121,10 @@ res <- triangular::decompose(poly)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Remove the triangles which are 'interior' according to the even-odd rule
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-tri_df <- res$plot_df %>%
+triangles_df <- res$triangles_df %>%
   filter(interior)
 
-ggplot(tri_df) +
+ggplot(triangles_df) +
   geom_polygon(aes(x, y, group = idx), alpha = 0.3, colour = 'blue') +
   theme_bw() + 
   coord_equal() + 
@@ -167,13 +167,13 @@ res <- triangular::decompose(poly)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Remove the triangles which are 'interior' according to the even-odd rule
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-tri_df <- res$plot_df %>%
+triangles_df <- res$triangles_df %>%
   filter(interior)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Manual rendering of triangles
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-ggplot(tri_df) +
+ggplot(triangles_df) +
   geom_polygon(aes(x, y, group = idx), alpha = 0.3, colour = 'blue') +
   theme_bw() +
   coord_equal() + 
@@ -218,13 +218,13 @@ res <- triangular::decompose(poly)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Remove the triangles which are 'interior' according to the even-odd rule
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-tri_df <- res$plot_df %>%
+triangles_df <- res$triangles_df %>%
   filter(interior)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Manual rendering of triangles
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-ggplot(tri_df) +
+ggplot(triangles_df) +
   geom_polygon(aes(x, y, group = idx), alpha = 0.3, colour = 'blue') +
   theme_bw() + 
   coord_equal() + 

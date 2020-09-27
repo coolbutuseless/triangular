@@ -105,6 +105,8 @@ decompose <- function(polys_df) {
 
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Result from RTriangle::triangulate():
+  #
   # T	  Triangulation specified as 3 column matrix in which each row
   #     contains indices in P of vertices.
   # E	  Set of edges in the triangulation.
@@ -118,18 +120,18 @@ decompose <- function(polys_df) {
   # VA	Matrix of attributes associated with the polygons of the Voronoi
   #     tessalation.
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  plot_df <- as.data.frame(tt$P)    # the original points
-  idx <- as.vector(t(tt$T))         # indices (in groups of 3) indicating vertices of tris
-  colnames(plot_df) <- c('x', 'y')  # Set actual colnames
-  plot_df <- plot_df[idx,]          # Replicate the vertices according to 'tt$T'
-  N <- nrow(plot_df)/3              # Assign an index to each triangle
-  plot_df$vert <- idx
-  plot_df$idx  <- rep(seq_len(N), each = 3)
+  triangles_df <- as.data.frame(tt$P)    # the original points
+  idx <- as.vector(t(tt$T))              # indices (in groups of 3) indicating vertices of tris
+  colnames(triangles_df) <- c('x', 'y')  # Set actual colnames
+  triangles_df <- triangles_df[idx,]     # Replicate the vertices according to 'tt$T'
+  N <- nrow(triangles_df)/3              # Assign an index to each triangle
+  triangles_df$vert <- idx
+  triangles_df$idx  <- rep(seq_len(N), each = 3)
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Calculate the centroid of each triangle
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  centroids <- aggregate(plot_df[,c('x', 'y')], by=list(plot_df$idx), FUN=mean)
+  centroids <- aggregate(triangles_df[,c('x', 'y')], by=list(triangles_df$idx), FUN=mean)
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Do a test to count how often the point crosses one of the original
@@ -138,12 +140,12 @@ decompose <- function(polys_df) {
   crosses <- points_in_polygons(centroids$x, centroids$y, polygons_list)
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  # Assign 'interior' as TRUE/FALSE depedning on whether the number of
+  # Assign 'interior' as TRUE/FALSE depending on whether the number of
   # segment crossing is odd or even
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   inside <- data.frame(idx = seq_along(crosses), crosses)
   inside <- transform(inside, interior = crosses %% 2 != 0)
-  plot_df <- merge(plot_df, inside)
+  triangles_df <- merge(triangles_df, inside)
 
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -152,8 +154,8 @@ decompose <- function(polys_df) {
   #  - data.frame of triangles
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   list(
-    tt      = tt,     # The full result of Rtriangle::triangulate()
-    plot_df = plot_df # The polys_df
+    tt           = tt,          # Full result of Rtriangle::triangulate()
+    triangles_df = triangles_df # Traingles data.frame
   )
 }
 
