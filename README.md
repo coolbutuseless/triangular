@@ -189,7 +189,7 @@ set.seed(1)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # 10 random points
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-poly <- df <- data.frame(
+polygons_df <- data.frame(
   x        = runif(10),
   y        = runif(10),
   group    = 1,
@@ -199,7 +199,7 @@ poly <- df <- data.frame(
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # "Native" ggplot2 rendering
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-ggplot(df) +
+ggplot(polygons_df) +
   geom_polygon(aes(x, y)) +
   geom_path(aes(x, y, group = interaction(group, subgroup)), colour = 'red') +
   theme_bw() + 
@@ -213,7 +213,7 @@ ggplot(df) +
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Decompose into triangles
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-res <- triangular::decompose(poly)
+res <- triangular::decompose(polygons_df)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Remove the triangles which are 'interior' according to the even-odd rule
@@ -232,3 +232,32 @@ ggplot(triangles_df) +
 ```
 
 <img src="man/figures/README-unnamed-chunk-5-2.png" width="60%" />
+
+``` r
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Polyclip processing
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+A <- split(polygons_df, interaction(polygons_df$group, polygons_df$subgroup))
+simplified_list <- polyclip::polysimplify(A)
+
+simplified_df <- lapply(
+  seq_along(simplified_list),
+  function(idx) {
+    res <- as.data.frame(simplified_list[[idx]])
+    res$idx <- idx
+    res
+  }
+)
+simplified_df <- do.call(rbind, simplified_df)
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Manual rendering of triangles
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ggplot(simplified_df) +
+  geom_polygon(aes(x, y, group = idx), alpha = 0.3, colour = 'blue') +
+  theme_bw() + 
+  coord_equal() + 
+  labs(title = "Decomposition into simple tris with 'polyclip::polysimplify()'")
+```
+
+<img src="man/figures/README-unnamed-chunk-5-3.png" width="60%" />
