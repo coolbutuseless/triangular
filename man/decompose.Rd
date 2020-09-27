@@ -4,10 +4,10 @@
 \alias{decompose}
 \title{Decompose complex polygon into a set of simple polygons}
 \usage{
-decompose(polys_df)
+decompose(polygons_df)
 }
 \arguments{
-\item{polys_df}{polygon data.frame with 'subgroup' indicating primary/hole
+\item{polygons_df}{polygon data.frame with 'subgroup' indicating primary/hole
 hierarchy}
 }
 \description{
@@ -16,12 +16,12 @@ Preserve holes. Even-odd inside test
 \examples{
 \dontrun{
 # Polygon with a hole
-polys_df <- df <- data.frame(
+polygons_df <- df <- data.frame(
   x        = c(4, 8, 8, 4,   6, 7, 7, 6),
   y        = c(4, 4, 8, 8,   6, 6, 7, 7),
   group    = c(1, 1, 1, 1,   1, 1, 1, 1),
   subgroup = c(1, 1, 1, 1,   2, 2, 2, 2)
 )
-triangular::decompose(polys_df)
+triangular::decompose(polygons_df)
 }
 }

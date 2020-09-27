@@ -40,6 +40,8 @@ library(triangular)
 
 ## Polygon with a Hole in it
 
+#### ggplot
+
 ``` r
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # polygons_df - data.frame of polygon vertices with group/subgroups
@@ -64,6 +66,8 @@ ggplot(polygons_df) +
 
 <img src="man/figures/README-unnamed-chunk-2-1.png" width="60%" />
 
+#### `{triangular}`
+
 ``` r
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Turn the polygon data.frame into individual triangles
@@ -86,14 +90,17 @@ ggplot(triangles_df) +
   labs(title = "Decomposition into simple tris with {triangular}")
 ```
 
-<img src="man/figures/README-unnamed-chunk-2-2.png" width="60%" />
+<img src="man/figures/README-unnamed-chunk-3-1.png" width="60%" />
 
 ## Polygon with Two Holes
 
+#### ggplot2
+
 ``` r
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# polygon
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-poly <- df <- data.frame(
+polygons_df <- data.frame(
   x        = c(4, 8, 8, 4,   6, 7, 7, 6,  4.5,   5, 5, 4.5),
   y        = c(4, 4, 8, 8,   6, 6, 7, 7,  4.5, 4.5, 5, 5),
   group    = c(1, 1, 1, 1,   1, 1, 1, 1,    1,   1, 1, 1),
@@ -103,20 +110,22 @@ poly <- df <- data.frame(
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # "Native" ggplot2 rendering
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-ggplot(df) +
+ggplot(polygons_df) +
   geom_polygon(aes(x, y, subgroup = subgroup), colour = 'red') + 
   theme_bw() + 
   coord_equal() + 
   labs(title = "ggplot2 rendering of original polygon(s)")
 ```
 
-<img src="man/figures/README-unnamed-chunk-3-1.png" width="60%" />
+<img src="man/figures/README-unnamed-chunk-4-1.png" width="60%" />
+
+#### `{triangular}`
 
 ``` r
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Decompose into triangles
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-res <- triangular::decompose(poly)
+res <- triangular::decompose(polygons_df)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Remove the triangles which are 'interior' according to the even-odd rule
@@ -124,6 +133,9 @@ res <- triangular::decompose(poly)
 triangles_df <- res$triangles_df %>%
   filter(interior)
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Plot the `triangular` decomposition into triangles
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ggplot(triangles_df) +
   geom_polygon(aes(x, y, group = idx), alpha = 0.3, colour = 'blue') +
   theme_bw() + 
@@ -131,15 +143,17 @@ ggplot(triangles_df) +
   labs(title = "Decomposition into simple tris with {triangular}")
 ```
 
-<img src="man/figures/README-unnamed-chunk-3-2.png" width="60%" />
+<img src="man/figures/README-unnamed-chunk-5-1.png" width="60%" />
 
 ## Two Polygons with One Hole Each
+
+#### ggplot
 
 ``` r
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Two polygons with one hole each
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-poly <- df <- data.frame(
+polygons_df <- data.frame(
   x        = c(1, 4, 4, 1,  2, 3, 3, 2,      5, 8, 8, 5,  6, 7, 7, 6),
   y        = c(1, 1, 4, 4,  2, 2, 3, 3,      5, 5, 8, 8,  6, 6, 7, 7),
   group    = c(1, 1, 1, 1,  1, 1, 1, 1,      1, 1, 1, 1,  1, 1, 1, 1),
@@ -149,20 +163,22 @@ poly <- df <- data.frame(
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # "Native" ggplot2 rendering
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-ggplot(df) +
+ggplot(polygons_df) +
   geom_polygon(aes(x, y, subgroup = subgroup), colour = 'red') + 
   theme_bw() + 
   coord_equal() + 
   labs(title = "ggplot2 rendering of original polygon(s)")
 ```
 
-<img src="man/figures/README-unnamed-chunk-4-1.png" width="60%" />
+<img src="man/figures/README-unnamed-chunk-6-1.png" width="60%" />
+
+#### triangular (Two Polygons with One Hole Each)
 
 ``` r
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Decompose into triangles
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-res <- triangular::decompose(poly)
+res <- triangular::decompose(polygons_df)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Remove the triangles which are 'interior' according to the even-odd rule
@@ -171,7 +187,7 @@ triangles_df <- res$triangles_df %>%
   filter(interior)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Manual rendering of triangles
+# Plot the `triangular` decomposition into triangles
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ggplot(triangles_df) +
   geom_polygon(aes(x, y, group = idx), alpha = 0.3, colour = 'blue') +
@@ -180,15 +196,25 @@ ggplot(triangles_df) +
   labs(title = "Decomposition into simple tris with {triangular}")
 ```
 
-<img src="man/figures/README-unnamed-chunk-4-2.png" width="60%" />
+<img src="man/figures/README-unnamed-chunk-7-1.png" width="60%" />
 
 ## Polygon from Random Points
 
+  - ggplot uses the underlying graphics engine to take care of polygon
+    intersection etc
+  - `{triangular}` uses `{RTriangle}` to break the input polygons into
+    triangles.
+  - `{polyclip}` separates the input polygons into simpler
+    non-intersecting polygons, but does not necessarily decompose the
+    inputs into triangles.
+
+#### ggplot (Polygon from Random Points)
+
 ``` r
-set.seed(1)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # 10 random points
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+set.seed(1)
 polygons_df <- data.frame(
   x        = runif(10),
   y        = runif(10),
@@ -207,7 +233,9 @@ ggplot(polygons_df) +
   labs(title = "ggplot2 rendering of original polygon(s)")
 ```
 
-<img src="man/figures/README-unnamed-chunk-5-1.png" width="60%" />
+<img src="man/figures/README-unnamed-chunk-8-1.png" width="60%" />
+
+#### triangular - (Polygon from Random Points)
 
 ``` r
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -222,7 +250,7 @@ triangles_df <- res$triangles_df %>%
   filter(interior)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Manual rendering of triangles
+# Plot the `triangular` decomposition into triangles
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ggplot(triangles_df) +
   geom_polygon(aes(x, y, group = idx), alpha = 0.3, colour = 'blue') +
@@ -231,7 +259,9 @@ ggplot(triangles_df) +
   labs(title = "Decomposition into simple tris with {triangular}")
 ```
 
-<img src="man/figures/README-unnamed-chunk-5-2.png" width="60%" />
+<img src="man/figures/README-unnamed-chunk-9-1.png" width="60%" />
+
+#### polyclip - Polygon from Random Points
 
 ``` r
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -251,13 +281,13 @@ simplified_df <- lapply(
 simplified_df <- do.call(rbind, simplified_df)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Manual rendering of triangles
+# Plot the `polyclip` decomposition into triangles
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ggplot(simplified_df) +
   geom_polygon(aes(x, y, group = idx), alpha = 0.3, colour = 'blue') +
   theme_bw() + 
   coord_equal() + 
-  labs(title = "Decomposition into simple tris with 'polyclip::polysimplify()'")
+  labs(title = "Decomposition into simple polygons - 'polyclip::polysimplify()'")
 ```
 
-<img src="man/figures/README-unnamed-chunk-5-3.png" width="60%" />
+<img src="man/figures/README-unnamed-chunk-10-1.png" width="60%" />

@@ -1,7 +1,12 @@
-# triangular 0.1.1 2020-09-28
+# triangular 0.1.2 2020-09-27
 
-* Refactor: abstracting 'point-in-polygons'.  Prepping to write C implementation.
+* Refactor: Now use `polyclip` package for point-in-polygon calculations. 
+  Removed bespoke point-in-polygon R functions from this package.
 
-# triangular 0.1.0 2020-09-27
+# triangular 0.1.1 2020-09-27
+
+* Refactor: abstracting 'point-in-polygons'
+
+# triangular 0.1.0 2020-09-26
 
 * Initial release

@@ -44,10 +44,11 @@ decompose_single <- function(polygon_df, offset) {
 #'
 #' Preserve holes. Even-odd inside test
 #'
-#' @param polys_df polygon data.frame with 'subgroup' indicating primary/hole
+#' @param polygons_df polygon data.frame with 'subgroup' indicating primary/hole
 #'        hierarchy
 #'
 #' @import RTriangle
+#' @import polyclip
 #' @importFrom utils head
 #' @importFrom stats aggregate
 #'
@@ -56,30 +57,30 @@ decompose_single <- function(polygon_df, offset) {
 #' @examples
 #' \dontrun{
 #' # Polygon with a hole
-#' polys_df <- df <- data.frame(
+#' polygons_df <- df <- data.frame(
 #'   x        = c(4, 8, 8, 4,   6, 7, 7, 6),
 #'   y        = c(4, 4, 8, 8,   6, 6, 7, 7),
 #'   group    = c(1, 1, 1, 1,   1, 1, 1, 1),
 #'   subgroup = c(1, 1, 1, 1,   2, 2, 2, 2)
 #' )
-#' triangular::decompose(polys_df)
+#' triangular::decompose(polygons_df)
 #' }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-decompose <- function(polys_df) {
+decompose <- function(polygons_df) {
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Polygons must be supplied in a data.frame with group/subgroup designations
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  stopifnot(is.data.frame(polys_df))
-  stopifnot('group'    %in% names(polys_df))
-  stopifnot('subgroup' %in% names(polys_df))
-  stopifnot('x'        %in% names(polys_df))
-  stopifnot('y'        %in% names(polys_df))
+  stopifnot(is.data.frame(polygons_df))
+  stopifnot('group'    %in% names(polygons_df))
+  stopifnot('subgroup' %in% names(polygons_df))
+  stopifnot('x'        %in% names(polygons_df))
+  stopifnot('y'        %in% names(polygons_df))
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # We need to create an S matrix for each group/subgroup
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  polygons_list <- split(polys_df, interaction(polys_df$subgroup, polys_df$group))
+  polygons_list <- split(polygons_df, interaction(polygons_df$subgroup, polygons_df$group))
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Work out the number of vertices within each group. This will be an
@@ -100,7 +101,7 @@ decompose <- function(polys_df) {
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Use RTriangle to triangulate the groups/subgroups
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  ps <- RTriangle::pslg(P = as.matrix(polys_df[,c('x', 'y')]), S = S)
+  ps <- RTriangle::pslg(P = as.matrix(polygons_df[,c('x', 'y')]), S = S)
   tt <- RTriangle::triangulate(ps)
 
 
@@ -134,19 +135,17 @@ decompose <- function(polys_df) {
   centroids <- aggregate(triangles_df[,c('x', 'y')], by=list(triangles_df$idx), FUN=mean)
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  # Do a test to count how often the point crosses one of the original
-  # polygon segments.
+  # Use polyclip to do testing of point in polygon.
+  # polyclip::pointinpolygon() only tests a set of points against a single
+  # polygon, so have to calculations over all polygons and then accumulate
+  # the result with a `Reduce()` call
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  crosses <- points_in_polygons(centroids$x, centroids$y, polygons_list)
-
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  # Assign 'interior' as TRUE/FALSE depending on whether the number of
-  # segment crossing is odd or even
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  inside <- data.frame(idx = seq_along(crosses), crosses)
-  inside <- transform(inside, interior = crosses %% 2 != 0)
+  P        <- list(x = centroids$x, y = centroids$y)
+  pip      <- lapply(polygons_list, function(A) polyclip::pointinpolygon(P, A))
+  crosses  <- Reduce(`+`, pip)
+  interior <- crosses %% 2 == 1
+  inside   <- data.frame(idx = seq_along(crosses), crosses, interior)
   triangles_df <- merge(triangles_df, inside)
-
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Return
@@ -154,11 +153,12 @@ decompose <- function(polys_df) {
   #  - data.frame of triangles
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   list(
-    tt           = tt,          # Full result of Rtriangle::triangulate()
-    triangles_df = triangles_df # Traingles data.frame
+    tt            = tt,            # Full result of Rtriangle::triangulate()
+    centroids     = centroids,     # triangle centroids
+    polygons_list = polygons_list, # list of original polygons. each element = 1 polygon
+    triangles_df  = triangles_df   # Traingles data.frame
   )
 }
-
 
 
 

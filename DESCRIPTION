@@ -1,7 +1,7 @@
 Package: triangular
 Type: Package
 Title: Decompose Complex Polygons into Triangles
-Version: 0.1.1
+Version: 0.1.2
 Author: mikefc
 Maintainer: mikefc <mikefc@coolbutuseless.com>
 Description: Decompose complex, self-intersecting polygons (which may contain
@@ -11,4 +11,5 @@ Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.1.1
 Imports:
-    RTriangle
+    RTriangle,
+    polyclip
