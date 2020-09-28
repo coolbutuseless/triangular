@@ -3,7 +3,73 @@
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#' Create the S matrix for RTriangle::pslg()
+#' Simplify a single polygon
+#'
+#' @param polygon_df data.frame containing a single polygon (x, y)
+#'
+#' @import polyclip
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+simplify_polygon <- function(polygon_df) {
+
+  sp <- polyclip::polysimplify(polygon_df)
+  sp <- lapply(seq_along(sp), function(ii) {
+    res          <- as.data.frame(sp[[ii]])
+    res$group    <- polygon_df$group[1]
+    res$subgroup <- polygon_df$subgroup[1] + ii/10000
+    res
+  })
+  sp <- do.call(rbind, sp)
+
+  sp
+}
+
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#' Simplify a polygon made up of groups and subgroups
+#'
+#' @param polygons_df data.frame containing multiple polygons
+#'        distinguished by group and subgroup
+#'
+#' @import polyclip
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+simplify_polygons <- function(polygons_df) {
+  polygons_list <- split(polygons_df, interaction(polygons_df$subgroup, polygons_df$group))
+
+  sp <- lapply(seq_along(polygons_list), function(ii) {
+    simplify_polygon(polygons_list[[ii]])
+  })
+
+  sp <- do.call(rbind, sp)
+
+  sp
+}
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#' Assign unique vertex indices to all points
+#'
+#' This will be used later to de-dupe the input data for RTriangle::triangulate()
+#'
+#' @param polygons_df data.frame containing multiple polygons
+#'        distinguished by group and subgroup
+#'
+#' @return inpput wit new 'vidx' and 'dupe' columns
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+assign_unique_vertex_indices <- function(polygons_df) {
+
+  polygons_df$dupe <- duplicated(polygons_df[, c('x', 'y')])
+
+  polygons_df$vidx <- as.integer(as.factor(with(polygons_df, interaction(x, y))))
+  polygons_df$vidx <- match(polygons_df$vidx, unique(polygons_df$vidx))
+
+  polygons_df
+}
+
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#' Create the S matrix for RTriangle::pslg() for a single polygon
 #'
 #' pslg = Planar Straight Line Graph object. A collection of vertices and segments.
 #'
@@ -17,25 +83,16 @@
 #' algorithm. If the segments do not enclose a region the whole triangulation
 #' may be eaten away.
 #'
-#' @param polygon_df data.frame containing a single polygon
-#' @param offset an index counter to ensure different subgroup polygons will
-#'        have different vertex indices.
+#' @param polygon_df data.frame containing a single polygon. Must have 'vidx' column
 #'
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-decompose_single <- function(polygon_df, offset) {
+create_S <- function(polygon_df) {
+  v1 <- polygon_df$vidx
+  v2 <- c(polygon_df$vidx[-1], polygon_df$vidx[1])
 
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  # Create the indices (v1, v2) of the start and end point of each segment.
-  # Ensure that 'v2' wraps around to point at the first index.
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  v1 <- seq_len(nrow(polygon_df))      + offset
-  v2 <- c(seq(2, nrow(polygon_df)), 1) + offset
-
-
-  S  <-  matrix(c(v1, v2), ncol = 2, nrow = nrow(polygon_df))
-
-  S
+  matrix(c(v1, v2), ncol = 2)
 }
+
 
 
 
@@ -80,28 +137,31 @@ decompose <- function(polygons_df) {
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # We need to create an S matrix for each group/subgroup
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  polygons_list <- split(polygons_df, interaction(polygons_df$subgroup, polygons_df$group))
+  polygons_df_1 <- simplify_polygons(polygons_df)
+  polygons_df_2 <- assign_unique_vertex_indices(polygons_df_1)
 
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  # Work out the number of vertices within each group. This will be an
-  # offset when calling 'decompose_single'
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  lens    <- vapply(polygons_list, nrow, integer(1))
-  lens    <- c(0, head(lens, -1))
-  offsets <- cumsum(lens)
+  polygons_list <- split(polygons_df_2, interaction(polygons_df_2$subgroup, polygons_df_2$group))
+
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Create an S matrix for each group/subgroup and combine into single matrix
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   S <- lapply(seq_along(polygons_list), function(i) {
-    decompose_single(polygons_list[[i]], offsets[i])
+    create_S(polygons_list[[i]])
   })
   S <- do.call(rbind, S)
+
+
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Only want the unique vertices passed to RTriangle
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  unique_verts <- as.matrix(polygons_df_2[!polygons_df_2$dupe, c('x', 'y')])
+
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Use RTriangle to triangulate the groups/subgroups
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  ps <- RTriangle::pslg(P = as.matrix(polygons_df[,c('x', 'y')]), S = S)
+  ps <- RTriangle::pslg(P = unique_verts, S = S)
   tt <- RTriangle::triangulate(ps)
 
 

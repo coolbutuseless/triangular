@@ -198,6 +198,78 @@ ggplot(triangles_df) +
 
 <img src="man/figures/README-unnamed-chunk-7-1.png" width="60%" />
 
+## Polygon with duplicated vertex
+
+This happens sometimes with `ggplot2::geom_density()`
+
+#### ggplot
+
+``` r
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Polygon with duplicated vertex
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+polygons_df <- data.frame(
+  x        = c(1, 2, 2, 1),
+  y        = c(1, 1, 2, 2),
+  group    = 1,
+  subgroup = 1
+)
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Polygon with duplicated vertex
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+polygons_df <- data.frame(
+  x        = c(0, 1, 2, 2, 1, 1),
+  y        = c(0, 1, 1, 2, 2, 1),
+  group    = 1,
+  subgroup = 1
+)
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# "Native" ggplot2 rendering
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ggplot(polygons_df) +
+  geom_polygon(aes(x, y)) +
+  geom_path(aes(x, y, group = interaction(group, subgroup)), colour = 'red') +
+  theme_bw() + 
+  coord_equal() + 
+  labs(title = "ggplot2 rendering of original polygon(s)") + 
+  xlim(0, 2) + 
+  ylim(0, 2)
+```
+
+<img src="man/figures/README-unnamed-chunk-8-1.png" width="60%" />
+
+#### triangular - (Polygon with duplicated vertex)
+
+``` r
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Decompose into triangles
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+res <- triangular::decompose(polygons_df)
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Remove the triangles which are 'interior' according to the even-odd rule
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+triangles_df <- res$triangles_df %>%
+  filter(interior)
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Plot the `triangular` decomposition into triangles
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ggplot(triangles_df) +
+  geom_polygon(aes(x, y, group = idx), alpha = 0.3, colour = 'blue') +
+  theme_bw() + 
+  coord_equal() + 
+  labs(title = "Decomposition into simple tris with {triangular}") + 
+  xlim(0, 2) + 
+  ylim(0, 2)
+```
+
+<img src="man/figures/README-unnamed-chunk-9-1.png" width="60%" />
+
 ## Polygon from Random Points
 
   - ggplot uses the underlying graphics engine to take care of polygon
@@ -233,7 +305,7 @@ ggplot(polygons_df) +
   labs(title = "ggplot2 rendering of original polygon(s)")
 ```
 
-<img src="man/figures/README-unnamed-chunk-8-1.png" width="60%" />
+<img src="man/figures/README-unnamed-chunk-10-1.png" width="60%" />
 
 #### triangular - (Polygon from Random Points)
 
@@ -259,7 +331,7 @@ ggplot(triangles_df) +
   labs(title = "Decomposition into simple tris with {triangular}")
 ```
 
-<img src="man/figures/README-unnamed-chunk-9-1.png" width="60%" />
+<img src="man/figures/README-unnamed-chunk-11-1.png" width="60%" />
 
 #### polyclip - Polygon from Random Points
 
@@ -290,4 +362,4 @@ ggplot(simplified_df) +
   labs(title = "Decomposition into simple polygons - 'polyclip::polysimplify()'")
 ```
 
-<img src="man/figures/README-unnamed-chunk-10-1.png" width="60%" />
+<img src="man/figures/README-unnamed-chunk-12-1.png" width="60%" />

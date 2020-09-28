@@ -1,7 +1,7 @@
 Package: triangular
 Type: Package
 Title: Decompose Complex Polygons into Triangles
-Version: 0.1.2
+Version: 0.1.3
 Author: mikefc
 Maintainer: mikefc <mikefc@coolbutuseless.com>
 Description: Decompose complex, self-intersecting polygons (which may contain

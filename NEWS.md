@@ -1,3 +1,11 @@
+# triangular 0.1.3 2020-09-28
+
+* Combine `polyclip::polysimplify()` with `RTriangle::triangulate()` to now 
+  cope with:
+    * holes in polygons
+    * self intersecting polygons
+    * polygons with duplicated vertices
+
 # triangular 0.1.2 2020-09-27
 
 * Refactor: Now use `polyclip` package for point-in-polygon calculations. 
