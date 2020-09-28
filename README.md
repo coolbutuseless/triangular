@@ -14,11 +14,30 @@ works with:
 
   - polygons with holes
   - self-intersecting polygons
+  - polygons with duplicated vertices
 
-This package relies heavily on
-[RTriangle](https://cran.r-project.org/package=RTriangle) - which is
-licensed [CC
-BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0).
+## Overview of process
+
+  - Split the given data.frame of polygons by `group` and `subgroup`
+  - Use `polyclip::polysimplify()` to simplify polygons i.e.
+      - remove duplicated vertices
+      - break self-intersecting polygons into simpler polygons
+  - massage the data into a format suitable for `RTriangle::pslg()` and
+    use this function to create a *Planar Straight Line Graph object*.
+  - Triangulate this object with `RTriangle::triangulate()` which
+    triangulates the simple polygons, while also taking into account the
+    presence of holes in the polygons
+
+## Licensing
+
+While the code in this package is licensed under
+[MIT](https://mit-license.org/), this package relies heavily on:
+
+  - [RTriangle](https://cran.r-project.org/package=RTriangle) which is
+    licensed [CC
+    BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0).
+  - [polyclip](https://cran.r-project.org/package=polyclip) which is
+    licensed [BSL](https://www.boost.org/LICENSE_1_0.txt)
 
 ## Installation
 
