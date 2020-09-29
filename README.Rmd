@@ -389,3 +389,55 @@ ggplot(simplified_df) +
 ```
 
 
+## Triforce
+
+
+
+Triforce
+------------------------------------------------------------------------------
+
+
+```{r}
+d <- sqrt(3)/2
+
+polygons_df <- df <- data.frame(
+  x        = c(0, 1, 0.5,   0.25, 0.5, 0.75),
+  y        = c(0, 0, d  ,   d/2   , 0  ,    d/2),
+  group    = 1L,
+  subgroup = c(1, 1, 1  , 2, 2, 2)
+)
+
+# p <- ggplot(polygons_df) +
+#   geom_polygon(aes(x, y, subgroup = subgroup), fill = 'grey20', colour = 'red')  + 
+#   # geom_line(aes(x, y)) + 
+#   theme_bw() + 
+#   coord_equal()
+# 
+# p
+
+res <- triangular::decompose(polygons_df)
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Remove the triangles which are 'interior' according to the even-odd rule
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+triangles_df <- res$triangles_df %>%
+  filter(interior) %>%
+  filter(crosses != -1)
+
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Plot the `polyclip` decomposition into triangles
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+p <- ggplot(triangles_df) +
+  geom_polygon(aes(x, y, fill = as.factor(idx)), alpha = 0.3, colour = 'blue') +
+  geom_path(aes(x, y)) + 
+  theme_bw() + 
+  coord_equal() + 
+  labs(title = "Decomposition into simple polygons - 'polyclip::polysimplify()'")
+
+p
+
+p + facet_wrap(~idx)
+
+```
