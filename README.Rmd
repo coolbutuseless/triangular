@@ -445,6 +445,6 @@ ggplot(triangles_df) +
   theme_bw() + 
   coord_equal() + 
   labs(title = "{triangular} decomposition of single polygon (with hole)\n into multiple simple polygons") + 
-  theme(legend.position = 'none')
+  theme(legend.position = 'none') 
 
 ```

@@ -1,3 +1,9 @@
+# triangular 0.1.5 2020-10-01
+
+* Only use `polyclip::polysimplify()` if there are duplicated vertices, 
+  otherwise, all test examples work with `RTriangle::triangulate()` without
+  any other processing.
+
 # triangular 0.1.4 2020-09-30
 
 * new `accetpable` column in `triangles_df` returned by `decompose()`.

@@ -137,9 +137,14 @@ decompose <- function(polygons_df) {
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # We need to create an S matrix for each group/subgroup
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  polygons_df_1 <- simplify_polygons(polygons_df)
-  polygons_df_2 <- assign_unique_vertex_indices(polygons_df_1)
-
+  if (anyDuplicated(polygons_df[, c('x', 'y')])) {
+    polygons_df_1 <- simplify_polygons(polygons_df)
+    polygons_df_2 <- assign_unique_vertex_indices(polygons_df_1)
+  } else {
+    polygons_df_2 <- polygons_df
+    polygons_df_2$vidx <- seq_len(nrow(polygons_df_2))
+    polygons_df_2$dupe <- FALSE
+  }
   polygons_list <- split(polygons_df_2, interaction(polygons_df_2$subgroup, polygons_df_2$group))
 
 
