@@ -1,3 +1,10 @@
+# triangular 0.1.4 2020-09-30
+
+* new `accetpable` column in `triangles_df` returned by `decompose()`.
+    * `acceptable = interior & !too_thin`
+    * where `too_thin` indicates triangles in which the centroid lies on the 
+      boundary, which makes them impossibly thin
+
 # triangular 0.1.3 2020-09-28
 
 * Combine `polyclip::polysimplify()` with `RTriangle::triangulate()` to now 

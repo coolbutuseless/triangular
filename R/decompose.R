@@ -202,9 +202,21 @@ decompose <- function(polygons_df) {
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   P        <- list(x = centroids$x, y = centroids$y)
   pip      <- lapply(polygons_list, function(A) polyclip::pointinpolygon(P, A))
-  crosses  <- Reduce(`+`, pip)
-  interior <- crosses %% 2 == 1
-  inside   <- data.frame(idx = seq_along(crosses), crosses, interior)
+
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # if centroid lies on the boundary pointinpolygon() return -1
+  # and the only way a triangle centroid can lie on the boundary: the triangle
+  # is so thin that numerical error lets it (a) exist as a triangle, (b) but
+  # the cnetroid of the triangle is on the boundary. delete these
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  too_thin <- do.call(pmin, pip) == -1
+
+
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ncrosses <- Reduce(`+`, pip)
+  interior <- ncrosses %% 2 == 1
+  inside   <- data.frame(idx = seq_along(ncrosses), ncrosses, interior, too_thin, acceptable = interior & !too_thin)
   triangles_df <- merge(triangles_df, inside)
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

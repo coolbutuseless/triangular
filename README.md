@@ -94,10 +94,11 @@ ggplot(polygons_df) +
 res <- triangular::decompose(polygons_df)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Remove the triangles which are 'interior' according to the even-odd rule
+# Keep the triangles which are acceptable: 
+# i.e. interior to the polygon, and not too thin
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 triangles_df <- res$triangles_df %>%
-  filter(interior)
+  filter(acceptable)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Plot the triangles
@@ -147,10 +148,11 @@ ggplot(polygons_df) +
 res <- triangular::decompose(polygons_df)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Remove the triangles which are 'interior' according to the even-odd rule
+# Keep the triangles which are acceptable: 
+# i.e. interior to the polygon, and not too thin
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 triangles_df <- res$triangles_df %>%
-  filter(interior)
+  filter(acceptable)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Plot the `triangular` decomposition into triangles
@@ -200,10 +202,11 @@ ggplot(polygons_df) +
 res <- triangular::decompose(polygons_df)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Remove the triangles which are 'interior' according to the even-odd rule
+# Keep the triangles which are acceptable: 
+# i.e. interior to the polygon, and not too thin
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 triangles_df <- res$triangles_df %>%
-  filter(interior)
+  filter(acceptable)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Plot the `triangular` decomposition into triangles
@@ -270,10 +273,11 @@ ggplot(polygons_df) +
 res <- triangular::decompose(polygons_df)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Remove the triangles which are 'interior' according to the even-odd rule
+# Keep the triangles which are acceptable: 
+# i.e. interior to the polygon, and not too thin
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 triangles_df <- res$triangles_df %>%
-  filter(interior)
+  filter(acceptable)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Plot the `triangular` decomposition into triangles
@@ -335,10 +339,11 @@ ggplot(polygons_df) +
 res <- triangular::decompose(polygons_df)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Remove the triangles which are 'interior' according to the even-odd rule
+# Keep the triangles which are acceptable: 
+# i.e. interior to the polygon, and not too thin
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 triangles_df <- res$triangles_df %>%
-  filter(interior)
+  filter(acceptable)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Plot the `triangular` decomposition into triangles
@@ -382,3 +387,59 @@ ggplot(simplified_df) +
 ```
 
 <img src="man/figures/README-unnamed-chunk-12-1.png" width="60%" />
+
+## Triforce
+
+## Triforce
+
+``` r
+d <- sqrt(3)/2
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Single triangular polygon with a triangular hole
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+polygons_df <- df <- data.frame(
+  x        = c(0, 1, 0.5,   0.25, 0.5, 0.75),
+  y        = c(0, 0, d  ,   d/2 , 0  ,  d/2),
+  subgroup = c(1, 1, 1  ,      2,   2,    2),
+  group    = 1L
+)
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# "Native" ggplot2 rendering
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ggplot(polygons_df) +
+  geom_polygon(aes(x, y, subgroup = subgroup)) +
+  geom_path(aes(x, y, group = interaction(group, subgroup)), colour = 'red') +
+  theme_bw() + 
+  coord_equal() + 
+  labs(title = "ggplot2 rendering of original polygon")
+```
+
+<img src="man/figures/README-unnamed-chunk-13-1.png" width="60%" />
+
+``` r
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# decompose into simple triangular pieces i.e. without holes or self-intersections
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+res <- triangular::decompose(polygons_df)
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Keep the triangles which are acceptable: 
+# i.e. interior to the polygon, and not too thin
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+triangles_df <- res$triangles_df %>%
+  filter(acceptable)
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Plot the decomposition into triangles
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ggplot(triangles_df) +
+  geom_polygon(aes(x, y, fill = as.factor(idx)), alpha = 0.3, colour = 'blue') +
+  theme_bw() + 
+  coord_equal() + 
+  labs(title = "{triangular} decomposition of single polygon (with hole)\n into multiple simple polygons") + 
+  theme(legend.position = 'none')
+```
+
+<img src="man/figures/README-unnamed-chunk-13-2.png" width="60%" />
