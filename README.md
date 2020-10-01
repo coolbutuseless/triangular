@@ -86,23 +86,17 @@ ggplot(polygons_df) +
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Turn the polygon data.frame into individual triangles
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-res <- triangular::decompose(polygons_df)
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Keep the triangles which are acceptable: 
-# i.e. interior to the polygon, and not too thin
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-triangles_df <- res$triangles_df %>%
-  filter(acceptable)
+triangles_df <- triangular::decompose(polygons_df)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Plot the triangles
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ggplot(triangles_df) +
-  geom_polygon(aes(x, y, group = idx), alpha = 0.3, colour = 'blue') +
+  geom_polygon(aes(x, y, group = idx, fill = as.factor(idx)), alpha = 0.3, colour = 'blue') +
   theme_bw() + 
   coord_equal() + 
-  labs(title = "Decomposition into simple tris with {triangular}")
+  labs(title = "Decomposition into simple tris with {triangular}") + 
+  theme(legend.position = 'none') 
 ```
 
 <img src="man/figures/README-unnamed-chunk-3-1.png" width="60%" />
@@ -140,23 +134,17 @@ ggplot(polygons_df) +
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Decompose into triangles
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-res <- triangular::decompose(polygons_df)
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Keep the triangles which are acceptable: 
-# i.e. interior to the polygon, and not too thin
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-triangles_df <- res$triangles_df %>%
-  filter(acceptable)
+triangles_df <- triangular::decompose(polygons_df)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Plot the `triangular` decomposition into triangles
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ggplot(triangles_df) +
-  geom_polygon(aes(x, y, group = idx), alpha = 0.3, colour = 'blue') +
+  geom_polygon(aes(x, y, group = idx, fill = as.factor(idx)), alpha = 0.3, colour = 'blue') +
   theme_bw() + 
   coord_equal() + 
-  labs(title = "Decomposition into simple tris with {triangular}")
+  labs(title = "Decomposition into simple tris with {triangular}") + 
+  theme(legend.position = 'none') 
 ```
 
 <img src="man/figures/README-unnamed-chunk-5-1.png" width="60%" />
@@ -194,23 +182,17 @@ ggplot(polygons_df) +
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Decompose into triangles
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-res <- triangular::decompose(polygons_df)
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Keep the triangles which are acceptable: 
-# i.e. interior to the polygon, and not too thin
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-triangles_df <- res$triangles_df %>%
-  filter(acceptable)
+triangles_df <- triangular::decompose(polygons_df)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Plot the `triangular` decomposition into triangles
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ggplot(triangles_df) +
-  geom_polygon(aes(x, y, group = idx), alpha = 0.3, colour = 'blue') +
+  geom_polygon(aes(x, y, group = idx, fill = as.factor(idx)), alpha = 0.3, colour = 'blue') +
   theme_bw() +
   coord_equal() + 
-  labs(title = "Decomposition into simple tris with {triangular}")
+  labs(title = "Decomposition into simple tris with {triangular}") + 
+  theme(legend.position = 'none') 
 ```
 
 <img src="man/figures/README-unnamed-chunk-7-1.png" width="60%" />
@@ -254,25 +236,19 @@ ggplot(polygons_df) +
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Decompose into triangles
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-res <- triangular::decompose(polygons_df)
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Keep the triangles which are acceptable: 
-# i.e. interior to the polygon, and not too thin
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-triangles_df <- res$triangles_df %>%
-  filter(acceptable)
+triangles_df <- triangular::decompose(polygons_df)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Plot the `triangular` decomposition into triangles
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ggplot(triangles_df) +
-  geom_polygon(aes(x, y, group = idx), alpha = 0.3, colour = 'blue') +
+  geom_polygon(aes(x, y, group = idx, fill = as.factor(idx)), alpha = 0.3, colour = 'blue') +
   theme_bw() + 
   coord_equal() + 
   labs(title = "Decomposition into simple tris with {triangular}") + 
   xlim(0, 2) + 
-  ylim(0, 2)
+  ylim(0, 2) + 
+  theme(legend.position = 'none') 
 ```
 
 <img src="man/figures/README-unnamed-chunk-9-1.png" width="60%" />
@@ -317,23 +293,17 @@ ggplot(polygons_df) +
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Decompose into triangles
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-res <- triangular::decompose(polygons_df)
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Keep the triangles which are acceptable: 
-# i.e. interior to the polygon, and not too thin
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-triangles_df <- res$triangles_df %>%
-  filter(acceptable)
+triangles_df <- triangular::decompose(polygons_df)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Plot the `triangular` decomposition into triangles
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ggplot(triangles_df) +
-  geom_polygon(aes(x, y, group = idx), alpha = 0.3, colour = 'blue') +
+  geom_polygon(aes(x, y, group = idx, fill = as.factor(idx)), alpha = 0.3, colour = 'blue') +
   theme_bw() + 
   coord_equal() + 
-  labs(title = "Decomposition into simple tris with {triangular}")
+  labs(title = "Decomposition into simple tris with {triangular}") + 
+  theme(legend.position = 'none') 
 ```
 
 <img src="man/figures/README-unnamed-chunk-11-1.png" width="60%" />
@@ -372,14 +342,7 @@ ggplot(polygons_df) +
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # decompose into simple triangular pieces i.e. without holes or self-intersections
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-res <- triangular::decompose(polygons_df)
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Keep the triangles which are acceptable: 
-# i.e. interior to the polygon, and not too thin
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-triangles_df <- res$triangles_df %>%
-  filter(acceptable)
+triangles_df <- triangular::decompose(polygons_df)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Plot the decomposition into triangles

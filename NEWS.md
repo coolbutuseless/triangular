@@ -1,3 +1,11 @@
+# triangular 0.1.7 2020-10-01
+
+* Simplified return structure to just be the data.frame of triangles of interest
+* There's a segfault in RTriangle that doesn't occur if I use `polyclip::polysimplify()` 
+  for duplicated vertices. Resurrecting that code from v0.1.5.
+* If there aren't dupe verts then RTriangle is all that's needed.
+
+  
 # triangular 0.1.6 2020-10-01
 
 * `polyclip` package is now only used for `pointinpolygon()` calculation

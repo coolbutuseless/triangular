@@ -102,8 +102,6 @@ create_S <- function(polygon_df) {
 #'
 #' @param polygons_df polygon data.frame with 'subgroup' indicating primary/hole
 #'        hierarchy
-#' @param dedupe_with_polyclip use polyclip to simplify polygons. Default: FALSE,
-#'        i.e. do manual deduplication.
 #'
 #' @import RTriangle
 #' @import polyclip
@@ -124,7 +122,7 @@ create_S <- function(polygon_df) {
 #' triangular::decompose(polygons_df)
 #' }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-decompose <- function(polygons_df, dedupe_with_polyclip = TRUE) {
+decompose <- function(polygons_df) {
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Polygons must be supplied in a data.frame with group/subgroup designations
@@ -138,7 +136,7 @@ decompose <- function(polygons_df, dedupe_with_polyclip = TRUE) {
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Deduplicate the vertices
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  if (dedupe_with_polyclip) {
+  if (anyDuplicated(polygons_df[,c('x', 'y')])) {
     polygons_df_1 <- simplify_polygons(polygons_df)
     polygons_df_2 <- assign_unique_vertex_indices(polygons_df_1)
   } else {
@@ -220,20 +218,15 @@ decompose <- function(polygons_df, dedupe_with_polyclip = TRUE) {
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   ncrosses <- Reduce(`+`, pip)
   interior <- ncrosses %% 2 == 1
-  inside   <- data.frame(idx = seq_along(ncrosses), ncrosses, interior, too_thin, acceptable = interior & !too_thin)
-  triangles_df <- merge(triangles_df, inside)
 
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  # Return
-  #  - the raw Rtriangle output
-  #  - data.frame of triangles
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  list(
-    tt            = tt,            # Full result of Rtriangle::triangulate()
-    centroids     = centroids,     # triangle centroids
-    polygons_list = polygons_list, # list of original polygons. each element = 1 polygon
-    triangles_df  = triangles_df   # Traingles data.frame
-  )
+  inside   <- data.frame(idx = seq_along(interior), acceptable = interior & !too_thin)
+  triangles_df <- merge(triangles_df, inside)
+  triangles_df <- subset(triangles_df, triangles_df$acceptable)
+
+  triangles_df$acceptable <- NULL
+  triangles_df$vert       <- NULL
+
+  triangles_df
 }
 
 
