@@ -19,9 +19,6 @@ works with:
 ## Overview of process
 
   - Split the given data.frame of polygons by `group` and `subgroup`
-  - Use `polyclip::polysimplify()` to simplify polygons i.e.
-      - remove duplicated vertices
-      - break self-intersecting polygons into simpler polygons
   - massage the data into a format suitable for `RTriangle::pslg()` and
     use this function to create a *Planar Straight Line Graph object*.
   - Triangulate this object with `RTriangle::triangulate()` which
@@ -36,8 +33,6 @@ While the code in this package is licensed under
   - [RTriangle](https://cran.r-project.org/package=RTriangle) which is
     licensed [CC
     BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0).
-  - [polyclip](https://cran.r-project.org/package=polyclip) which is
-    licensed [BSL](https://www.boost.org/LICENSE_1_0.txt)
 
 ## Installation
 
@@ -231,17 +226,6 @@ This happens sometimes with `ggplot2::geom_density()`
 # Polygon with duplicated vertex
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 polygons_df <- data.frame(
-  x        = c(1, 2, 2, 1),
-  y        = c(1, 1, 2, 2),
-  group    = 1,
-  subgroup = 1
-)
-
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Polygon with duplicated vertex
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-polygons_df <- data.frame(
   x        = c(0, 1, 2, 2, 1, 1),
   y        = c(0, 1, 1, 2, 2, 1),
   group    = 1,
@@ -299,9 +283,6 @@ ggplot(triangles_df) +
     intersection etc
   - `{triangular}` uses `{RTriangle}` to break the input polygons into
     triangles.
-  - `{polyclip}` separates the input polygons into simpler
-    non-intersecting polygons, but does not necessarily decompose the
-    inputs into triangles.
 
 #### ggplot (Polygon from Random Points)
 
@@ -357,37 +338,6 @@ ggplot(triangles_df) +
 
 <img src="man/figures/README-unnamed-chunk-11-1.png" width="60%" />
 
-#### polyclip - Polygon from Random Points
-
-``` r
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Polyclip processing
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-A <- split(polygons_df, interaction(polygons_df$group, polygons_df$subgroup))
-simplified_list <- polyclip::polysimplify(A)
-
-simplified_df <- lapply(
-  seq_along(simplified_list),
-  function(idx) {
-    res <- as.data.frame(simplified_list[[idx]])
-    res$idx <- idx
-    res
-  }
-)
-simplified_df <- do.call(rbind, simplified_df)
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Plot the `polyclip` decomposition into triangles
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-ggplot(simplified_df) +
-  geom_polygon(aes(x, y, group = idx), alpha = 0.3, colour = 'blue') +
-  theme_bw() + 
-  coord_equal() + 
-  labs(title = "Decomposition into simple polygons - 'polyclip::polysimplify()'")
-```
-
-<img src="man/figures/README-unnamed-chunk-12-1.png" width="60%" />
-
 ## Triforce
 
 ## Triforce
@@ -416,7 +366,7 @@ ggplot(polygons_df) +
   labs(title = "ggplot2 rendering of original polygon")
 ```
 
-<img src="man/figures/README-unnamed-chunk-13-1.png" width="60%" />
+<img src="man/figures/README-unnamed-chunk-12-1.png" width="60%" />
 
 ``` r
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -439,7 +389,7 @@ ggplot(triangles_df) +
   theme_bw() + 
   coord_equal() + 
   labs(title = "{triangular} decomposition of single polygon (with hole)\n into multiple simple polygons") + 
-  theme(legend.position = 'none')
+  theme(legend.position = 'none') 
 ```
 
-<img src="man/figures/README-unnamed-chunk-13-2.png" width="60%" />
+<img src="man/figures/README-unnamed-chunk-12-2.png" width="60%" />

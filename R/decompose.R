@@ -1,51 +1,5 @@
 
 
-
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#' Simplify a single polygon
-#'
-#' @param polygon_df data.frame containing a single polygon (x, y)
-#'
-#' @import polyclip
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-simplify_polygon <- function(polygon_df) {
-
-  sp <- polyclip::polysimplify(polygon_df)
-  sp <- lapply(seq_along(sp), function(ii) {
-    res          <- as.data.frame(sp[[ii]])
-    res$group    <- polygon_df$group[1]
-    res$subgroup <- polygon_df$subgroup[1] + ii/10000
-    res
-  })
-  sp <- do.call(rbind, sp)
-
-  sp
-}
-
-
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#' Simplify a polygon made up of groups and subgroups
-#'
-#' @param polygons_df data.frame containing multiple polygons
-#'        distinguished by group and subgroup
-#'
-#' @import polyclip
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-simplify_polygons <- function(polygons_df) {
-  polygons_list <- split(polygons_df, interaction(polygons_df$subgroup, polygons_df$group))
-
-  sp <- lapply(seq_along(polygons_list), function(ii) {
-    simplify_polygon(polygons_list[[ii]])
-  })
-
-  sp <- do.call(rbind, sp)
-
-  sp
-}
-
-
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #' Assign unique vertex indices to all points
 #'
@@ -135,16 +89,9 @@ decompose <- function(polygons_df) {
   stopifnot('y'        %in% names(polygons_df))
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  # We need to create an S matrix for each group/subgroup
+  # Deduplicate the vertices
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  if (anyDuplicated(polygons_df[, c('x', 'y')])) {
-    polygons_df_1 <- simplify_polygons(polygons_df)
-    polygons_df_2 <- assign_unique_vertex_indices(polygons_df_1)
-  } else {
-    polygons_df_2 <- polygons_df
-    polygons_df_2$vidx <- seq_len(nrow(polygons_df_2))
-    polygons_df_2$dupe <- FALSE
-  }
+  polygons_df_2 <- assign_unique_vertex_indices(polygons_df)
   polygons_list <- split(polygons_df_2, interaction(polygons_df_2$subgroup, polygons_df_2$group))
 
 
