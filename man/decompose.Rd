@@ -2,16 +2,35 @@
 % Please edit documentation in R/decompose.R
 \name{decompose}
 \alias{decompose}
-\title{Decompose complex polygon into a set of simple polygons}
+\title{Decompose complex polygons into triangles}
 \usage{
 decompose(polygons_df)
 }
 \arguments{
-\item{polygons_df}{polygon data.frame with 'subgroup' indicating primary/hole
-hierarchy}
+\item{polygons_df}{polygon data.frame with \code{x,y} coordinates,  'group'
+column denoting coordinates which belong to the same group,
+and 'subgroup' indicating holes within that polygon.}
+}
+\value{
+data.frame with \code{x}, \code{y} coordinates of the vertices of the
+        resulting triangles. Also includes \code{idx} numbering the triangles.
 }
 \description{
-Preserve holes. Even-odd inside test
+This function wraps \code{RTriangle::triangulate()} to make it easier to
+call for my use case, and returns results appropriate for plotting in
+\code{ggplot2}.
+}
+\details{
+By combining \code{polyclip} and \code{RTriangle} packages, this package
+will successfully decompose into triangles the following polygon types:
+
+\itemize{
+\item{Simple polygons}
+\item{Polyons with holes}
+\item{Multiple polygons with holes}
+\item{Polygons with self-intersection}
+\item{Polygons with duplicated vertices}
+}
 }
 \examples{
 \dontrun{
@@ -22,6 +41,8 @@ polygons_df <- df <- data.frame(
   group    = c(1, 1, 1, 1,   1, 1, 1, 1),
   subgroup = c(1, 1, 1, 1,   2, 2, 2, 2)
 )
-triangular::decompose(polygons_df)
+triangles_df <- triangular::decompose(polygons_df)
+ggplot(triangles_df) +
+    geom_polygon(aes(x, y, fill = as.factor(idx)))
 }
 }

@@ -1,6 +1,5 @@
 
 
-
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #' Simplify a single polygon
 #'
@@ -43,6 +42,7 @@ simplify_polygons <- function(polygons_df) {
 
   sp
 }
+
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -94,18 +94,33 @@ create_S <- function(polygon_df) {
 
 
 
-
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#' Decompose complex polygon into a set of simple polygons
+#' Decompose complex polygons into triangles
 #'
-#' Preserve holes. Even-odd inside test
+#' This function wraps \code{RTriangle::triangulate()} to make it easier to
+#' call for my use case, and returns results appropriate for plotting in
+#' \code{ggplot2}.
 #'
-#' @param polygons_df polygon data.frame with 'subgroup' indicating primary/hole
-#'        hierarchy
+#' By combining \code{polyclip} and \code{RTriangle} packages, this package
+#' will successfully decompose into triangles the following polygon types:
+#'
+#' \itemize{
+#' \item{Simple polygons}
+#' \item{Polyons with holes}
+#' \item{Multiple polygons with holes}
+#' \item{Polygons with self-intersection}
+#' \item{Polygons with duplicated vertices}
+#' }
+#'
+#' @param polygons_df polygon data.frame with \code{x,y} coordinates,  'group'
+#'        column denoting coordinates which belong to the same group,
+#'        and 'subgroup' indicating holes within that polygon.
+#'
+#' @return data.frame with \code{x}, \code{y} coordinates of the vertices of the
+#'         resulting triangles. Also includes \code{idx} numbering the triangles.
 #'
 #' @import RTriangle
 #' @import polyclip
-#' @importFrom utils head
 #' @importFrom stats aggregate
 #'
 #' @export
@@ -119,7 +134,9 @@ create_S <- function(polygon_df) {
 #'   group    = c(1, 1, 1, 1,   1, 1, 1, 1),
 #'   subgroup = c(1, 1, 1, 1,   2, 2, 2, 2)
 #' )
-#' triangular::decompose(polygons_df)
+#' triangles_df <- triangular::decompose(polygons_df)
+#' ggplot(triangles_df) +
+#'     geom_polygon(aes(x, y, fill = as.factor(idx)))
 #' }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 decompose <- function(polygons_df) {
@@ -134,7 +151,8 @@ decompose <- function(polygons_df) {
   stopifnot('y'        %in% names(polygons_df))
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  # Deduplicate the vertices
+  # If there are any duplicate vertices, then simplify the polygon first
+  # with `polyclip`.
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   if (anyDuplicated(polygons_df[,c('x', 'y')])) {
     polygons_df_1 <- simplify_polygons(polygons_df)
@@ -202,8 +220,8 @@ decompose <- function(polygons_df) {
   # polygon, so have to calculations over all polygons and then accumulate
   # the result with a `Reduce()` call
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  P        <- list(x = centroids$x, y = centroids$y)
-  pip      <- lapply(polygons_list, function(A) polyclip::pointinpolygon(P, A))
+  P   <- list(x = centroids$x, y = centroids$y)
+  pip <- lapply(polygons_list, function(A) polyclip::pointinpolygon(P, A))
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # if centroid lies on the boundary pointinpolygon() return -1
@@ -215,6 +233,7 @@ decompose <- function(polygons_df) {
 
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Prep dataframe for return. Filter out triangles which aren't acceptable
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   ncrosses <- Reduce(`+`, pip)
   interior <- ncrosses %% 2 == 1
@@ -228,8 +247,5 @@ decompose <- function(polygons_df) {
 
   triangles_df
 }
-
-
-
 
 

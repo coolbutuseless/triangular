@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# triangular
+# triangular <img src="man/figures/logo.png" align="right" height=300/>
 
 <!-- badges: start -->
 
@@ -16,15 +16,6 @@ works with:
   - self-intersecting polygons
   - polygons with duplicated vertices
 
-## Overview of process
-
-  - Split the given data.frame of polygons by `group` and `subgroup`
-  - massage the data into a format suitable for `RTriangle::pslg()` and
-    use this function to create a *Planar Straight Line Graph object*.
-  - Triangulate this object with `RTriangle::triangulate()` which
-    triangulates the simple polygons, while also taking into account the
-    presence of holes in the polygons
-
 ## Licensing
 
 While the code in this package is licensed under
@@ -33,6 +24,8 @@ While the code in this package is licensed under
   - [RTriangle](https://cran.r-project.org/package=RTriangle) which is
     licensed [CC
     BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0).
+  - [polyclip](https://cran.r-project.org/package=polyclip) which is
+    licensed under [BSL](https://www.boost.org/LICENSE_1_0.txt)
 
 ## Installation
 
@@ -44,17 +37,9 @@ You can install from
 remotes::install_github('coolbutuseless/triangular')
 ```
 
-## Example
-
-This is a basic example which shows you how to solve a common problem:
-
-``` r
-library(triangular)
-```
-
 ## Polygon with a Hole in it
 
-#### ggplot
+#### `ggplot2` rendering of polygon with a hole in it
 
 ``` r
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -72,7 +57,7 @@ polygons_df <- df <- data.frame(
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ggplot(polygons_df) +
   geom_polygon(aes(x, y, group=group, subgroup=subgroup)) +
-  geom_path(aes(x, y, group = interaction(group, subgroup)), colour = 'red') +
+  geom_path(aes(x, y, group = interaction(group, subgroup))) +
   theme_bw() + 
   coord_equal() + 
   labs(title = "ggplot2 rendering of original polygon(s)")
@@ -80,7 +65,7 @@ ggplot(polygons_df) +
 
 <img src="man/figures/README-unnamed-chunk-2-1.png" width="60%" />
 
-#### `{triangular}`
+#### `{triangular}` decomposition of a polygon with a hole
 
 ``` r
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -92,7 +77,7 @@ triangles_df <- triangular::decompose(polygons_df)
 # Plot the triangles
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ggplot(triangles_df) +
-  geom_polygon(aes(x, y, group = idx, fill = as.factor(idx)), alpha = 0.3, colour = 'blue') +
+  geom_polygon(aes(x, y, fill = as.factor(idx)), colour = 'grey20', size = 0.15) +
   theme_bw() + 
   coord_equal() + 
   labs(title = "Decomposition into simple tris with {triangular}") + 
@@ -103,7 +88,7 @@ ggplot(triangles_df) +
 
 ## Polygon with Two Holes
 
-#### ggplot2
+#### `ggplot2` rendering of polygon with two holes
 
 ``` r
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -120,7 +105,7 @@ polygons_df <- data.frame(
 # "Native" ggplot2 rendering
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ggplot(polygons_df) +
-  geom_polygon(aes(x, y, subgroup = subgroup), colour = 'red') + 
+  geom_polygon(aes(x, y, subgroup = subgroup)) + 
   theme_bw() + 
   coord_equal() + 
   labs(title = "ggplot2 rendering of original polygon(s)")
@@ -128,7 +113,7 @@ ggplot(polygons_df) +
 
 <img src="man/figures/README-unnamed-chunk-4-1.png" width="60%" />
 
-#### `{triangular}`
+#### `{triangular}` decomposition of a polygon with two holes
 
 ``` r
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -140,7 +125,7 @@ triangles_df <- triangular::decompose(polygons_df)
 # Plot the `triangular` decomposition into triangles
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ggplot(triangles_df) +
-  geom_polygon(aes(x, y, group = idx, fill = as.factor(idx)), alpha = 0.3, colour = 'blue') +
+  geom_polygon(aes(x, y, fill = as.factor(idx)), colour = 'grey20', size = 0.15) +
   theme_bw() + 
   coord_equal() + 
   labs(title = "Decomposition into simple tris with {triangular}") + 
@@ -151,7 +136,7 @@ ggplot(triangles_df) +
 
 ## Two Polygons with One Hole Each
 
-#### ggplot
+#### `ggplot2` rendering of muliple polygons with holes
 
 ``` r
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -168,7 +153,7 @@ polygons_df <- data.frame(
 # "Native" ggplot2 rendering
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ggplot(polygons_df) +
-  geom_polygon(aes(x, y, subgroup = subgroup), colour = 'red') + 
+  geom_polygon(aes(x, y, subgroup = subgroup)) + 
   theme_bw() + 
   coord_equal() + 
   labs(title = "ggplot2 rendering of original polygon(s)")
@@ -176,7 +161,7 @@ ggplot(polygons_df) +
 
 <img src="man/figures/README-unnamed-chunk-6-1.png" width="60%" />
 
-#### triangular (Two Polygons with One Hole Each)
+#### triangular decomposition (Two Polygons with One Hole Each)
 
 ``` r
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -188,7 +173,7 @@ triangles_df <- triangular::decompose(polygons_df)
 # Plot the `triangular` decomposition into triangles
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ggplot(triangles_df) +
-  geom_polygon(aes(x, y, group = idx, fill = as.factor(idx)), alpha = 0.3, colour = 'blue') +
+  geom_polygon(aes(x, y, fill = as.factor(idx)), colour = 'grey20', size = 0.15) +
   theme_bw() +
   coord_equal() + 
   labs(title = "Decomposition into simple tris with {triangular}") + 
@@ -201,7 +186,7 @@ ggplot(triangles_df) +
 
 This happens sometimes with `ggplot2::geom_density()`
 
-#### ggplot
+#### `ggplot2` rendering of polygon with duplicated vertices
 
 ``` r
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -220,7 +205,7 @@ polygons_df <- data.frame(
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ggplot(polygons_df) +
   geom_polygon(aes(x, y)) +
-  geom_path(aes(x, y, group = interaction(group, subgroup)), colour = 'red') +
+  geom_path(aes(x, y, group = interaction(group, subgroup))) +
   theme_bw() + 
   coord_equal() + 
   labs(title = "ggplot2 rendering of original polygon(s)") + 
@@ -230,7 +215,7 @@ ggplot(polygons_df) +
 
 <img src="man/figures/README-unnamed-chunk-8-1.png" width="60%" />
 
-#### triangular - (Polygon with duplicated vertex)
+#### `triangular` decomposition - (Polygon with duplicated vertex)
 
 ``` r
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -242,7 +227,7 @@ triangles_df <- triangular::decompose(polygons_df)
 # Plot the `triangular` decomposition into triangles
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ggplot(triangles_df) +
-  geom_polygon(aes(x, y, group = idx, fill = as.factor(idx)), alpha = 0.3, colour = 'blue') +
+  geom_polygon(aes(x, y, fill = as.factor(idx)), colour = 'grey20', size = 0.15) +
   theme_bw() + 
   coord_equal() + 
   labs(title = "Decomposition into simple tris with {triangular}") + 
@@ -255,12 +240,7 @@ ggplot(triangles_df) +
 
 ## Polygon from Random Points
 
-  - ggplot uses the underlying graphics engine to take care of polygon
-    intersection etc
-  - `{triangular}` uses `{RTriangle}` to break the input polygons into
-    triangles.
-
-#### ggplot (Polygon from Random Points)
+#### `ggplot2` rendering of a Polygon made from Random Points)
 
 ``` r
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -279,7 +259,7 @@ polygons_df <- data.frame(
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ggplot(polygons_df) +
   geom_polygon(aes(x, y)) +
-  geom_path(aes(x, y, group = interaction(group, subgroup)), colour = 'red') +
+  geom_path(aes(x, y, group = interaction(group, subgroup))) +
   theme_bw() + 
   coord_equal() + 
   labs(title = "ggplot2 rendering of original polygon(s)")
@@ -287,7 +267,7 @@ ggplot(polygons_df) +
 
 <img src="man/figures/README-unnamed-chunk-10-1.png" width="60%" />
 
-#### triangular - (Polygon from Random Points)
+#### `triangular` decomposition - (Polygon from Random Points)
 
 ``` r
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -299,7 +279,7 @@ triangles_df <- triangular::decompose(polygons_df)
 # Plot the `triangular` decomposition into triangles
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ggplot(triangles_df) +
-  geom_polygon(aes(x, y, group = idx, fill = as.factor(idx)), alpha = 0.3, colour = 'blue') +
+  geom_polygon(aes(x, y, fill = as.factor(idx)), colour = 'grey20', size = 0.15) +
   theme_bw() + 
   coord_equal() + 
   labs(title = "Decomposition into simple tris with {triangular}") + 
@@ -316,7 +296,7 @@ ggplot(triangles_df) +
 d <- sqrt(3)/2
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Single triangular polygon with a triangular hole
+# Single triangle with a triangular hole
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 polygons_df <- df <- data.frame(
   x        = c(0, 1, 0.5,   0.25, 0.5, 0.75),
@@ -330,7 +310,7 @@ polygons_df <- df <- data.frame(
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ggplot(polygons_df) +
   geom_polygon(aes(x, y, subgroup = subgroup)) +
-  geom_path(aes(x, y, group = interaction(group, subgroup)), colour = 'red') +
+  geom_path(aes(x, y, group = interaction(group, subgroup))) +
   theme_bw() + 
   coord_equal() + 
   labs(title = "ggplot2 rendering of original polygon")
@@ -348,11 +328,97 @@ triangles_df <- triangular::decompose(polygons_df)
 # Plot the decomposition into triangles
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ggplot(triangles_df) +
-  geom_polygon(aes(x, y, fill = as.factor(idx)), alpha = 0.3, colour = 'blue') +
+  geom_polygon(aes(x, y, fill = as.factor(idx)), colour = 'grey20', size = 0.15) +
   theme_bw() + 
   coord_equal() + 
   labs(title = "{triangular} decomposition of single polygon (with hole)\n into multiple simple polygons") + 
   theme(legend.position = 'none') 
 ```
 
-<img src="man/figures/README-unnamed-chunk-12-2.png" width="60%" />
+<img src="man/figures/README-unnamed-chunk-13-1.png" width="60%" />
+
+## Logo
+
+#### `ggplot2` rendering nested hexagons
+
+``` r
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# polygons_df - data.frame of polygon vertices with group/subgroups
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+r <- 5
+hex_df <- data.frame(
+  x = r * cos(seq(30, 360, 60) * pi/180),
+  y = r * sin(seq(30, 360, 60) * pi/180),
+  group = 1,
+  subgroup = 1
+)
+
+hole_df <- data.frame(
+  x = 2 * cos(seq(30, 360, 60) * pi/180) + 1,
+  y = 2 * sin(seq(30, 360, 60) * pi/180) + 1,
+  group    = 1,
+  subgroup = 2
+)
+
+polygons_df <- rbind(hex_df, hole_df)
+
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# How 'ggplot2' handles this case
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ggplot(polygons_df) +
+  geom_polygon(aes(x, y, group=group, subgroup=subgroup)) +
+  geom_path(aes(x, y, group = interaction(group, subgroup))) +
+  theme_bw() + 
+  coord_equal() + 
+  labs(title = "ggplot2 rendering of original polygon(s)")
+```
+
+<img src="man/figures/README-unnamed-chunk-14-1.png" width="60%" />
+
+#### `{triangular}` decomposition of nested hexagons
+
+``` r
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Turn the polygon data.frame into individual triangles
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+triangles_df <- triangular::decompose(polygons_df)
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Plot the triangles
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+p <- ggplot(triangles_df) +
+  geom_polygon(aes(x, y, fill = as.factor(idx)), colour = 'grey20', size = 0.15) +
+  theme_void() + 
+  coord_equal() + 
+  theme(legend.position = 'none') + 
+  scale_fill_viridis_d(option = 'D') + 
+  annotate('text', x = 1, y = 1.4, label = 't\nr  i\na  n  g\nu  l  a  r', 
+           size = 5.5, family = 'mono', fontface = 'bold')
+
+ggsave("man/figures/logo.png", plot = p, width = 5, height = 5)
+
+p
+```
+
+<img src="man/figures/README-unnamed-chunk-15-1.png" width="60%" />
+
+## Related Software
+
+  - [silicate](https://cran.r-project.org/package=silicate) +
+    [anglr](https://cran.r-project.org/package=anglr) do all of what
+    triangular does (and more\!), with a much more configurable
+    interface (that I did not need)
+  - [decido](https://cran.r-project.org/package=decido) does fast
+    ear-cutting triangulation.  
+    Unfortunately, this doesn’t deal nicely with self-intersecting
+    polygons.
+
+## Acknowledgements
+
+  - [Michael Sumner](https://twitter.com/mdsumner) on twitter for his
+    in-depth technical advice on graphics and and triangles in R
+  - R Core for developing and maintaining such a wonderful language.
+  - CRAN maintainers, for patiently shepherding packages onto CRAN and
+    maintaining the repository
