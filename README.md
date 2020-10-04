@@ -145,15 +145,16 @@ ggplot(triangles_df) +
 polygons_df <- data.frame(
   x        = c(1, 4, 4, 1,  2, 3, 3, 2,      5, 8, 8, 5,  6, 7, 7, 6),
   y        = c(1, 1, 4, 4,  2, 2, 3, 3,      5, 5, 8, 8,  6, 6, 7, 7),
-  group    = c(1, 1, 1, 1,  1, 1, 1, 1,      1, 1, 1, 1,  1, 1, 1, 1),
-  subgroup = c(1, 1, 1, 1,  2, 2, 2, 2,      3, 3, 3, 3,  4, 4, 4, 4)
+  group    = c(1, 1, 1, 1,  1, 1, 1, 1,      2, 2, 2, 2,  2, 2, 2, 2),
+  subgroup = c(1, 1, 1, 1,  2, 2, 2, 2,      3, 3, 3, 3,  4, 4, 4, 4),
+  fill     = rep(c('tomato', 'skyblue'), each = 8)
 )
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # "Native" ggplot2 rendering
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ggplot(polygons_df) +
-  geom_polygon(aes(x, y, subgroup = subgroup)) + 
+  geom_polygon(aes(x, y, subgroup = subgroup, fill = I(fill))) + 
   theme_bw() + 
   coord_equal() + 
   labs(title = "ggplot2 rendering of original polygon(s)")
@@ -173,7 +174,7 @@ triangles_df <- triangular::decompose(polygons_df)
 # Plot the `triangular` decomposition into triangles
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ggplot(triangles_df) +
-  geom_polygon(aes(x, y, fill = as.factor(idx)), colour = 'grey20', size = 0.15) +
+  geom_polygon(aes(x, y, fill = I(fill), group = idx), colour = 'grey20', size = 0.15) +
   theme_bw() +
   coord_equal() + 
   labs(title = "Decomposition into simple tris with {triangular}") + 
@@ -193,10 +194,11 @@ This happens sometimes with `ggplot2::geom_density()`
 # Polygon with duplicated vertex
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 polygons_df <- data.frame(
-  x        = c(0, 1, 2, 2, 1, 1),
-  y        = c(0, 1, 1, 2, 2, 1),
-  group    = 1,
-  subgroup = 1
+  x        = c(1, 2, 2, 1,  2, 3, 3, 2),
+  y        = c(1, 1, 2, 2,  2, 2, 3, 3),
+  group    = c(1, 1, 1, 1,  2, 2, 2, 2),
+  subgroup = 1,
+  fill     = rep(c('tomato', 'skyblue'), each = 4)
 )
 
 
@@ -204,13 +206,10 @@ polygons_df <- data.frame(
 # "Native" ggplot2 rendering
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ggplot(polygons_df) +
-  geom_polygon(aes(x, y)) +
-  geom_path(aes(x, y, group = interaction(group, subgroup))) +
+  geom_polygon(aes(x, y, group = group, fill = I(fill))) +
   theme_bw() + 
   coord_equal() + 
-  labs(title = "ggplot2 rendering of original polygon(s)") + 
-  xlim(0, 2) + 
-  ylim(0, 2)
+  labs(title = "ggplot2 rendering of original polygon(s)")
 ```
 
 <img src="man/figures/README-unnamed-chunk-8-1.png" width="60%" />
@@ -227,12 +226,10 @@ triangles_df <- triangular::decompose(polygons_df)
 # Plot the `triangular` decomposition into triangles
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ggplot(triangles_df) +
-  geom_polygon(aes(x, y, fill = as.factor(idx)), colour = 'grey20', size = 0.15) +
+  geom_polygon(aes(x, y, fill = I(fill), group = idx), colour = 'grey20', size = 0.15) +
   theme_bw() + 
   coord_equal() + 
-  labs(title = "Decomposition into simple tris with {triangular}") + 
-  xlim(0, 2) + 
-  ylim(0, 2) + 
+  labs(title = "Decomposition into simple tris with {triangular}") +
   theme(legend.position = 'none') 
 ```
 
@@ -258,7 +255,7 @@ polygons_df <- data.frame(
 # "Native" ggplot2 rendering
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ggplot(polygons_df) +
-  geom_polygon(aes(x, y)) +
+  geom_polygon(aes(x, y), fill = 'skyblue') +
   geom_path(aes(x, y, group = interaction(group, subgroup))) +
   theme_bw() + 
   coord_equal() + 

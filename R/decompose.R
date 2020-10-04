@@ -32,7 +32,8 @@ simplify_polygon <- function(polygon_df) {
 #' @import polyclip
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 simplify_polygons <- function(polygons_df) {
-  polygons_list <- split(polygons_df, interaction(polygons_df$subgroup, polygons_df$group))
+
+  polygons_list <- split(polygons_df, polygons_df$subgroup)
 
   sp <- lapply(seq_along(polygons_list), function(ii) {
     simplify_polygon(polygons_list[[ii]])
@@ -94,61 +95,15 @@ create_S <- function(polygon_df) {
 
 
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#' Decompose complex polygons into triangles
-#'
-#' This function wraps \code{RTriangle::triangulate()} to make it easier to
-#' call for my use case, and returns results appropriate for plotting in
-#' \code{ggplot2}.
-#'
-#' By combining \code{polyclip} and \code{RTriangle} packages, this package
-#' will successfully decompose into triangles the following polygon types:
-#'
-#' \itemize{
-#' \item{Simple polygons}
-#' \item{Polyons with holes}
-#' \item{Multiple polygons with holes}
-#' \item{Polygons with self-intersection}
-#' \item{Polygons with duplicated vertices}
-#' }
-#'
-#' @param polygons_df polygon data.frame with \code{x,y} coordinates,  'group'
-#'        column denoting coordinates which belong to the same group,
-#'        and 'subgroup' indicating holes within that polygon.
-#'
-#' @return data.frame with \code{x}, \code{y} coordinates of the vertices of the
-#'         resulting triangles. Also includes \code{idx} numbering the triangles.
-#'
-#' @import RTriangle
-#' @import polyclip
-#' @importFrom stats aggregate
-#'
-#' @export
-#'
-#' @examples
-#' \dontrun{
-#' # Polygon with a hole
-#' polygons_df <- df <- data.frame(
-#'   x        = c(4, 8, 8, 4,   6, 7, 7, 6),
-#'   y        = c(4, 4, 8, 8,   6, 6, 7, 7),
-#'   group    = c(1, 1, 1, 1,   1, 1, 1, 1),
-#'   subgroup = c(1, 1, 1, 1,   2, 2, 2, 2)
-#' )
-#' triangles_df <- triangular::decompose(polygons_df)
-#' ggplot(triangles_df) +
-#'     geom_polygon(aes(x, y, fill = as.factor(idx)))
-#' }
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-decompose <- function(polygons_df) {
 
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  # Polygons must be supplied in a data.frame with group/subgroup designations
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  stopifnot(is.data.frame(polygons_df))
-  stopifnot('group'    %in% names(polygons_df))
-  stopifnot('subgroup' %in% names(polygons_df))
-  stopifnot('x'        %in% names(polygons_df))
-  stopifnot('y'        %in% names(polygons_df))
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#' Inner function to decompose a single polygon 'group'
+#'
+#' @inheritParams decompose
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+decompose_single <- function(polygons_df) {
+  stopifnot(length(unique(polygons_df$group)) == 1)
+
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # If there are any duplicate vertices, then simplify the polygon first
@@ -160,7 +115,7 @@ decompose <- function(polygons_df) {
   } else {
     polygons_df_2 <- assign_unique_vertex_indices(polygons_df)
   }
-  polygons_list <- split(polygons_df_2, interaction(polygons_df_2$subgroup, polygons_df_2$group))
+  polygons_list <- split(polygons_df_2, polygons_df_2$subgroup)
 
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -176,6 +131,15 @@ decompose <- function(polygons_df) {
   # Only want the unique vertices passed to RTriangle
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   unique_verts <- as.matrix(polygons_df_2[!polygons_df_2$dupe, c('x', 'y')])
+
+
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Properties to save/restore.
+  # This assumes that the properties across a polygon 'group' are all
+  # identical
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  property_cols <- setdiff(colnames(polygons_df), c('x', 'y', 'group', 'subgroup'))
+  properties_df <- polygons_df[1, property_cols, drop = FALSE]
 
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -244,6 +208,101 @@ decompose <- function(polygons_df) {
 
   triangles_df$acceptable <- NULL
   triangles_df$vert       <- NULL
+
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Join back in the properties of this polygon
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  triangles_df <- cbind(triangles_df, properties_df)
+
+
+  triangles_df
+}
+
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#' Decompose complex polygons into triangles
+#'
+#' This function wraps \code{RTriangle::triangulate()} to make it easier to
+#' call for my use case, and returns results appropriate for plotting in
+#' \code{ggplot2}.
+#'
+#' By combining \code{polyclip} and \code{RTriangle} packages, this package
+#' will successfully decompose into triangles the following polygon types:
+#'
+#' \itemize{
+#' \item{Simple polygons}
+#' \item{Polyons with holes}
+#' \item{Multiple polygons with holes}
+#' \item{Polygons with self-intersection}
+#' \item{Polygons with duplicated vertices}
+#' }
+#'
+#' @param polygons_df polygon data.frame with \code{x,y} coordinates,  'group'
+#'        column denoting coordinates which belong to the same group,
+#'        and 'subgroup' indicating holes within that polygon.  It is assumed
+#'        that any other column values are consistent across the entire group
+#'        e.g. 'fill'
+#'
+#' @return data.frame with \code{x}, \code{y} coordinates of the vertices of the
+#'         resulting triangles. Also includes \code{idx} numbering the triangles.
+#'
+#' @import RTriangle
+#' @import polyclip
+#' @importFrom stats aggregate
+#'
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' # Polygon with a hole
+#' polygons_df <- df <- data.frame(
+#'   x        = c(4, 8, 8, 4,   6, 7, 7, 6),
+#'   y        = c(4, 4, 8, 8,   6, 6, 7, 7),
+#'   group    = c(1, 1, 1, 1,   1, 1, 1, 1),
+#'   subgroup = c(1, 1, 1, 1,   2, 2, 2, 2)
+#' )
+#' triangles_df <- triangular::decompose(polygons_df)
+#' ggplot(triangles_df) +
+#'     geom_polygon(aes(x, y, fill = as.factor(idx)))
+#' }
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+decompose <- function(polygons_df) {
+
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Polygons must be supplied in a data.frame with group/subgroup designations
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  stopifnot(is.data.frame(polygons_df))
+  stopifnot('group'    %in% names(polygons_df))
+  stopifnot('subgroup' %in% names(polygons_df))
+  stopifnot('x'        %in% names(polygons_df))
+  stopifnot('y'        %in% names(polygons_df))
+
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # polyclip::polysimplify() can be touchy on 'x', and 'y' being plain
+  # numeric values.  So ensure conversion here.  'ggplot2' also sometimes
+  # add some weird classes to numeric columns in data.frames for plotting,
+  # and this will drop the classes which confuse polyclip
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  polygons_df$x <- as.numeric(polygons_df$x)
+  polygons_df$y <- as.numeric(polygons_df$y)
+
+
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # For each polygon group, decompose into triangles
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  polygon_groups <- split(polygons_df, polygons_df$group)
+  triangles_df_list <- lapply(
+    polygon_groups,
+    decompose_single
+  )
+  triangles_df <- do.call(rbind, triangles_df_list)
+
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Final triangle numbering
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  N <- nrow(triangles_df)/3              # Assign an index to each triangle
+  triangles_df$idx  <- rep(seq_len(N), each = 3)
 
   triangles_df
 }

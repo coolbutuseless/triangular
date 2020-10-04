@@ -1,3 +1,11 @@
+# triangular 0.1.8 2020-10-05
+
+* `decompose()` now passes through all other columns on the data.frame. However,
+  the value in each column is enforced as a single unique value across the 
+  `group` i.e. you cannot have different values at different vertices within 
+  a single polygon `group`.
+
+
 # triangular 0.1.7 2020-10-01
 
 * Simplified return structure to just be the data.frame of triangles of interest

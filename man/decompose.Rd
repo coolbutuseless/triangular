@@ -9,7 +9,9 @@ decompose(polygons_df)
 \arguments{
 \item{polygons_df}{polygon data.frame with \code{x,y} coordinates,  'group'
 column denoting coordinates which belong to the same group,
-and 'subgroup' indicating holes within that polygon.}
+and 'subgroup' indicating holes within that polygon.  It is assumed
+that any other column values are consistent across the entire group
+e.g. 'fill'}
 }
 \value{
 data.frame with \code{x}, \code{y} coordinates of the vertices of the
